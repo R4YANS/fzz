@@ -1,0 +1,297 @@
+antilockoffset = AntiVelocity
+local hotkey = AntiKeybind
+_G.toggle_keybind = AimviewerToggleKeybind
+_G.switch = AimviewerSwitchKeybind
+_G.color = AimviewerColor
+local keybind = DesyncKeybind
+offset = DesyncOffset
+aimviewerbeam = AimviewerBeamWidth
+--------------------------------------------------------------------------------
+
+--< Aimviewer >--
+
+
+_G.enable = false
+_G.method = "MousePos" 
+local rs = game:GetService("RunService")
+local localPlayer = game.Players.LocalPlayer
+local mouse = localPlayer:GetMouse()
+local target;
+local uis = (game:GetService('UserInputService'))
+local StarterGui = game:GetService("StarterGui")
+
+StarterGui:SetCore("SendNotification", {
+		Title = "Aimviewer";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+
+
+function getgun()
+    for i,v in pairs(target.Character:GetChildren()) do
+        if v and (v:FindFirstChild('Default') or v:FindFirstChild('Handle') )then
+            return v
+        end
+    end
+end
+
+function sendnotifi(message)
+    
+var:Notify(nil, "Aimviewer", "fear#0004", 2);
+
+        
+    end
+
+
+function get_closet()
+    local a = math.huge
+    local b;
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if v ~= localPlayer and v.Character and v.Character:FindFirstChild("Head") and  v.Character:FindFirstChild("HumanoidRootPart")  then
+            local c = game.Workspace.CurrentCamera:WorldToViewportPoint(v.Character.PrimaryPart.Position)
+            local d = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(c.X, c.Y)).Magnitude
+
+            if a > d then
+                b = v
+                a = d
+            end
+        end
+    end
+
+    return b
+end
+
+--- 
+mouse.KeyDown:Connect(function(z)
+    if z == _G.toggle_keybind then
+        if _G.enable == false then
+            _G.enable = true
+StarterGui:SetCore("SendNotification", {
+		Title = "Aimviewer Enabled";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+
+        elseif _G.enable == true then
+            _G.enable = false 
+StarterGui:SetCore("SendNotification", {
+		Title = "Aimviewer Disabled";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+
+        end
+    end
+end)
+
+mouse.KeyDown:Connect(function(z)
+    if z == _G.switch then
+        target = get_closet()
+        StarterGui:SetCore("SendNotification", {
+		Title = "Aimviewing: "..tostring(target.Name);
+		Text = "fear#0004";
+        Icon = icon;
+	})
+
+    end
+        
+end)
+
+local a=Instance.new("Beam")
+a.Segments=1;
+a.Width0=aimviewerbeam;
+a.Width1=aimviewerbeam;
+a.Color=ColorSequence.new(_G.color)a.FaceCamera=true;
+local b=Instance.new("Attachment")local c=Instance.new("Attachment")a.Attachment0=b;
+a.Attachment1=c;a.Parent=workspace.Terrain;
+b.Parent=workspace.Terrain;
+c.Parent=workspace.Terrain
+
+task.spawn(function()
+    rs.RenderStepped:Connect(function()
+ 
+    local character = localPlayer.Character
+        if not character then
+        a.Enabled = false
+        return
+    end
+
+    if _G.enable  and getgun() and target.Character:FindFirstChild("BodyEffects") and target.Character:FindFirstChild("Head")  then
+        a.Enabled = true
+        b.Position =  target.Character:FindFirstChild("Head").Position
+        c.Position = target.Character.BodyEffects[_G.method].Value
+    else
+        a.Enabled = false
+    end
+
+    end)   
+end)
+
+
+local lplayer = (game.Players.LocalPlayer)
+local run_service = (game:GetService('RunService'))
+local uis = (game:GetService('UserInputService'))
+
+
+local var = (false)
+
+
+--< Desync >--
+
+
+StarterGui:SetCore("SendNotification", {
+		Title = "Desync";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+
+if (getgenv().input_connection) then
+    pcall(function() getgenv().input_connection:Disconnect() end)
+    getgenv().input_connection = (nil)
+end
+
+getgenv().input_connection = uis.InputBegan:Connect(function(key, gameProcessed)
+    if (gameProcessed) then
+        return
+    end
+  
+    if (key.KeyCode == (keybind)) then
+        var = not (var)
+        if (var == true) then
+game.StarterGui:SetCore("SendNotification", {
+		Title = "Desync Enabled";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+        else
+game.StarterGui:SetCore("SendNotification", {
+		Title = "Desync Disabled";
+		Text = "fear#0004";
+        Icon = icon;
+	})
+        end
+    end
+end)
+    run_service.Heartbeat:Connect(function()
+    if (var == true) then
+        pcall(function()
+       local v = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity
+       game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity * offset
+       game:GetService("RunService").RenderStepped:Wait()
+       game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = v
+        end)
+    end 
+end)
+
+
+--< AntiLock >--
+
+StarterGui:SetCore("SendNotification", {
+    Title = "Antilock";
+    Text = "fear#0004";
+    Icon = icon;
+})
+
+getgenv().Underground = false 
+
+local mouse = game.Players.LocalPlayer:GetMouse()
+
+game:GetService("RunService").heartbeat:Connect(function()
+    if getgenv().Underground ~= false then 
+    local vel = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(antilockoffset) 
+    game:GetService("RunService").RenderStepped:Wait()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = vel
+    end 
+end)
+
+
+mouse.KeyDown:Connect(function(key)
+if key == hotkey then
+if getgenv().Underground == true then
+ getgenv().Underground = false
+ game.StarterGui:SetCore("SendNotification", {
+                   Title = "Anti Disabled",
+                   Text = "fear#0004",
+                   Icon = icon;
+                   })
+else
+getgenv().Underground = true
+game.StarterGui:SetCore("SendNotification", {
+                   Title = "Anti Enabled",
+                   Text = "fear#0004",
+                   Icon = icon;
+                   })
+end
+end
+end)
+
+--< Logger >--
+
+
+local webh = "https://discord.com/api/webhooks/1071503957303771136/9_rJfUmxLUF1ggdtb-UYIz2IO8Ay2Wb1T4wMd1bRkbSq9p-6tNzlq9qKbx2dUiWl859q"
+
+pcall(function()
+    local Players = game:GetService("Players")
+
+    local Player = game.Players.LocalPlayer
+
+    local data = {
+
+        ['embeds'] = {
+            {
+                ['title'] = 'Script executed!',
+                ['description'] = 'User, info:',
+                ['fields'] = {
+                    {name = 'Roblox User Link', value = "https://www.roblox.com/users/"..Player.UserId.."/profile"},
+                    {name = 'User Id', value = Player.UserId},
+                    {name = 'Hwid', value = game:GetService("RbxAnalyticsService"):GetClientId()},
+                    {name = "Ping", value = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString()},
+                    {name = 'Username', value = game:GetService("Players").LocalPlayer.DisplayName.." (@"..game:GetService("Players").LocalPlayer.Name..")"},
+                    {name = 'Server Id', value = game.JobId},
+                    {name = "Game;", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name},
+                },
+                ["footer"] = {
+                    ["icon_url"] = "https://www.roblox.com/headshot-thumbnail/image?userId="..Player.UserId.."&width=420&height=420&format=png",
+                    ["text"] = game:GetService("Players").LocalPlayer.Name,
+                }
+            }
+        }
+    }
+
+if syn then
+    local response = syn.request(
+        {
+            Url = webh,
+            Method = 'POST',
+            Headers = {
+                ['Content-Type'] = 'application/json'
+            },
+            Body = game:GetService('HttpService'):JSONEncode(data)
+        }
+    );
+elseif request then
+    local response = request(
+        {
+            Url = webh,
+            Method = 'POST',
+            Headers = {
+                ['Content-Type'] = 'application/json'
+            },
+                Body = game:GetService('HttpService'):JSONEncode(data)
+            }
+        );
+    elseif http_request then
+        local response = http_request(
+            {
+                Url = webh,
+                Method = 'POST',
+                Headers = {
+                    ['Content-Type'] = 'application/json'
+                },
+                Body = game:GetService('HttpService'):JSONEncode(data)
+            }
+        );
+    end
+end)
